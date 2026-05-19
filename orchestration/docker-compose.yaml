@@ -1,19 +1,26 @@
 services:
-  db:
-    image: postgres:17-alpine
-    restart: unless-stopped
-    env_file:
-      - .env.db
-    volumes: 
-      - postgres_data:/var/lib/postgresql/data
-    ports: 
-      - 5432:5432
-  adminer:
-    image: adminer
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    command: ["azurite", "-l", "/data", "--blobHost", "0.0.0.0", "--queueHost", "0.0.0.0", "--tableHost", "0.0.0.0", "--loose", "--skipApiVersionCheck"]
     restart: unless-stopped
     ports:
-      - 8080:8080
+      - 10000:10000
+      - 10001:10001
+      - 10002:10002
+  queue_worker:
+    image: queue_worker
+    ports:
+      - 5678:5678
+    restart: unless-stopped
     depends_on:
-      - db
+      - azurite
+  web-api:
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    pull_policy: build
+    restart: unless-stopped
+    ports:
+      - 5050:5000
 volumes:
   postgres_data:

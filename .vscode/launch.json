@@ -2,13 +2,35 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Attach Web API",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": { "host": "localhost", "port": 5679 },
+      "justMyCode": false,
+      "pathMappings": [
+        { "localRoot": "${workspaceFolder}/orchestration/common_services", "remoteRoot": "/app/common_services" },
+        { "localRoot": "${workspaceFolder}/orchestration/app", "remoteRoot": "/app" }
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/orchestration"
+      }
+    },
+    {
       "name": "Attach Queue Worker",
       "type": "debugpy",
       "request": "attach",
       "connect": { "host": "localhost", "port": 5678 },
+      "justMyCode": false,
       "pathMappings": [
         { "localRoot": "${workspaceFolder}/orchestration/queue_worker", "remoteRoot": "/app" }
       ]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug All Services",
+      "configurations": ["Attach Queue Worker", "Attach Web API"],
+      "preLaunchTask": "Start Services (dev)"
     }
   ]
 }

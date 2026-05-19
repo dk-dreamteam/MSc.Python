@@ -1,0 +1,17 @@
+services:
+  queue_worker:
+    build:
+      context: ./queue_worker
+      dockerfile: Dockerfile.dev
+    image: queue_worker:dev
+    ports:
+      - "5678:5678"
+
+  web-api:
+    build:
+      context: .
+      dockerfile: app/Dockerfile.dev
+    image: web-api:dev
+    ports:
+      - "5050:5000"
+      - "5679:5679"

@@ -1,0 +1,18 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Services (dev)",
+      "type": "shell",
+      "command": "docker compose -f docker-compose.yaml -f docker-compose.dev.yml up -d --build",
+      "options": {
+        "cwd": "${workspaceFolder}/orchestration"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

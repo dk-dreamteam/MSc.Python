@@ -1,7 +1,7 @@
--- Ενεργοποίηση της επέκτασης για την δημιουργία UUIDs
+-- Enable the extension for UUID generation
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 1. Δημιουργία πίνακα Καταστάσεων (Statuses)
+-- Create Statuses table
 CREATE TABLE IF NOT EXISTS statuses (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) UNIQUE NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS statuses (
     is_deleted BOOLEAN DEFAULT FALSE
 );
 
--- 2. Δημιουργία πίνακα Κατηγοριών (Categories)
+-- Create Categories table
 CREATE TABLE IF NOT EXISTS categories (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) UNIQUE NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS categories (
     is_deleted BOOLEAN DEFAULT FALSE
 );
 
--- 3. Δημιουργία πίνακα Προβλημάτων/Αναφορών (Tickets)
+-- Create Tickets/Reports table
 CREATE TABLE IF NOT EXISTS tickets (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title VARCHAR(255) NOT NULL,
@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS tickets (
     status_id INTEGER REFERENCES statuses(id) ON DELETE SET NULL,
     latitude NUMERIC(10, 7) NOT NULL,
     longitude NUMERIC(10, 7) NOT NULL,
+    address VARCHAR(255),
     photo_url VARCHAR(512),
     ai_priority_suggestion VARCHAR(50),
     ai_category_confidence NUMERIC(5, 2),

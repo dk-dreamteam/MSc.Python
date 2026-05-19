@@ -1,4 +1,4 @@
--- Δημιουργία Indexes για γρήγορη αναζήτηση και φιλτράρισμα
+-- Create Indexes for fast searching and filtering
 CREATE INDEX idx_tickets_status ON tickets(status_id);
 CREATE INDEX idx_tickets_category ON tickets(category_id);
 CREATE INDEX idx_tickets_created_at ON tickets(created_at);

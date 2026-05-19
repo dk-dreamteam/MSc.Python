@@ -1,6 +1,6 @@
--- Αρχικοποίηση Δεδομένων (Seed Data)
+-- Initialize Data (Seed Data)
 
--- Εισαγωγή των προκαθορισμένων Καταστάσεων
+-- Insert predefined Statuses
 INSERT INTO statuses (name, description) VALUES
     ('Reported', 'The problem was reported by a citizen.'),
     ('In Progress', 'The problem has been checked and actions are being taken for resolution.'),
@@ -8,7 +8,7 @@ INSERT INTO statuses (name, description) VALUES
     ('Rejected', 'The report is invalid or not feasible for resolution.')
 ON CONFLICT (name) DO NOTHING;
 
--- Εισαγωγή των προκαθορισμένων Κατηγοριών
+-- Insert predefined Categories
 INSERT INTO categories (name, description) VALUES
     ('Roads', 'Potholes, damaged sidewalks, road surface deterioration.'),
     ('Street Lighting', 'Burned-out bulbs, faults in lighting poles.'),

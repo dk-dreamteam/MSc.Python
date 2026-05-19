@@ -1,5 +1,5 @@
 from flask import Flask
-from common_services.events_service import EventsService
+from common_services import EventsService
 
 app = Flask(__name__)
 

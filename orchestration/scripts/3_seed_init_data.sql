@@ -2,19 +2,19 @@
 
 -- Insert predefined Statuses
 INSERT INTO statuses (name, description) VALUES
-    ('Reported', 'The problem was reported by a citizen.'),
-    ('In Progress', 'The problem has been checked and actions are being taken for resolution.'),
-    ('Resolved', 'The problem has been successfully addressed.'),
-    ('Rejected', 'The report is invalid or not feasible for resolution.')
+    ('Δημιουργήθηκε', 'Το πρόβλημα καταχωρήθηκε από τον πολίτη.'),
+    ('Σε Εξέλιξη', 'Το πρόβλημα έχει ελεγχθεί και γίνονται ενέργειες επίλυσης.'),
+    ('Επιλύθηκε', 'Το πρόβλημα έχει αντιμετωπιστεί επιτυχώς.'),
+    ('Απορρίφθηκε', 'Η αναφορά δεν ευσταθεί ή δεν είναι εφικτή η επίλυση.')
 ON CONFLICT (name) DO NOTHING;
 
 -- Insert predefined Categories
 INSERT INTO categories (name, description) VALUES
-    ('Roads', 'Potholes, damaged sidewalks, road surface deterioration.'),
-    ('Street Lighting', 'Burned-out bulbs, faults in lighting poles.'),
-    ('Cleanliness', 'Dumped waste, large objects, litter.'),
-    ('Water Supply / Sewage', 'Water leaks, broken pipes, blocked manholes.'),
-    ('Green Spaces', 'Tree cutting, park maintenance.'),
-    ('Abandoned Vehicles', 'Vehicles without plates or abandoned for a long time.'),
-    ('Other', 'Anything that does not fit into the above categories.')
+    ('Οδοποιία', 'Λακκούβες, κατεστραμμένα πεζοδρόμια, φθορές στο οδόστρωμα.'),
+    ('Ηλεκτροφωτισμός', 'Καμμένες λάμπες, βλάβες σε κολώνες φωτισμού.'),
+    ('Καθαριότητα', 'Ξεχειλισμένοι κάδοι, ογκώδη αντικείμενα, σκουπίδια.'),
+    ('Ύδρευση / Αποχέτευση', 'Διαρροές νερών, σπασμένοι αγωγοί, βουλωμένα φρεάτια.'),
+    ('Πράσινο', 'Κοπή δέντρων, συντήρηση πάρκων.'),
+    ('Εγκαταλελειμμένα Οχήματα', 'Οχήματα χωρίς πινακίδες ή εγκαταλελειμμένα για καιρό.'),
+    ('Άλλο', 'Οτιδήποτε δεν εντάσσεται στις παραπάνω κατηγορίες.')
 ON CONFLICT (name) DO NOTHING;

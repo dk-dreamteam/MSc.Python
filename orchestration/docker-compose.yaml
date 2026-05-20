@@ -29,5 +29,14 @@ services:
       - 8080:8080
     depends_on:
       - db
+  azurite:
+    container_name: azurite
+    image: mcr.microsoft.com/azure-storage/azurite
+    command: ["azurite", "-l", "/data", "--blobHost", "0.0.0.0", "--queueHost", "0.0.0.0", "--tableHost", "0.0.0.0", "--loose", "--skipApiVersionCheck"]
+    restart: unless-stopped
+    ports:
+      - 10000:10000
+      - 10001:10001
+      - 10002:10002
 volumes:
   postgres_data:

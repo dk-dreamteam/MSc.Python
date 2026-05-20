@@ -1,0 +1,4 @@
+groq==0.18.0
+requests==2.32.3
+azure-storage-queue==12.12.0
+debugpy==1.8.11

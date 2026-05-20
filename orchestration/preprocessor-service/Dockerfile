@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY *.py .
 
-CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "main.py"]
+CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5679", "main.py"]

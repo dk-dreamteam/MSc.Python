@@ -50,5 +50,17 @@ services:
       - azurite
     ports:
       - 5678:5678
+  preprocessor-service:
+    container_name: preprocessor-service
+    build:
+      context: ./preprocessor-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env.preprocessor-service
+    depends_on:
+      - azurite
+    ports:
+      - 5679:5679
 volumes:
   postgres_data:

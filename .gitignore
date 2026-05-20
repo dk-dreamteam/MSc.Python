@@ -1,1 +1,2 @@
 orchestration/.env.db
+orchestration/.env.notification-service

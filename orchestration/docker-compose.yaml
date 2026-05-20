@@ -14,8 +14,9 @@ services:
       timeout: 5s
       retries: 5
       start_period: 20s
-    ports: 
+    ports:
       - 5432:5432
+
   adminer:
     container_name: adminer
     image: adminer
@@ -28,6 +29,71 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
+  azurite:
+    container_name: azurite
+    image: mcr.microsoft.com/azure-storage/azurite
+    restart: unless-stopped
+    command: azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --skipApiVersionCheck
+    ports:
+      - 10000:10000
+      - 10001:10001
+      - 10002:10002
+    volumes:
+      - azurite_data:/data
+
+  flask-api:
+    container_name: flask-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - 5000:5000
+    environment:
+      - DATABASE_URL=postgresql://sa:77java&&@db:5432/cityreport
+      - AZURITE_CONNECTION_STRING=DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - NTFY_TOPIC=${NTFY_TOPIC:-cityreport-notifications}
+      - NTFY_URL=${NTFY_URL:-https://ntfy.sh}
+    depends_on:
+      db:
+        condition: service_healthy
+      azurite:
+        condition: service_started
+
+  streamlit-dashboard:
+    container_name: streamlit-dashboard
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    restart: unless-stopped
+    ports:
+      - 8501:8501
+    environment:
+      - DATABASE_URL=postgresql://sa:77java&&@db:5432/cityreport
+    depends_on:
+      db:
+        condition: service_healthy
+
+  scheduler:
+    container_name: scheduler
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: python run_scheduler.py
+    environment:
+      - DATABASE_URL=postgresql://sa:77java&&@db:5432/cityreport
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - NTFY_TOPIC=${NTFY_TOPIC:-cityreport-notifications}
+      - NTFY_URL=${NTFY_URL:-https://ntfy.sh}
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   postgres_data:
+  azurite_data:

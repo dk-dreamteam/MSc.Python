@@ -1,6 +1,7 @@
 import os
 import logging
 import psycopg2
+from psycopg2.extras import RealDictCursor
 from api.models import Ticket
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,7 @@ class TicketRepository:
             raise ValueError(f"Missing DB env vars: {', '.join(missing)}")
 
     def _get_connection(self):
-        return psycopg2.connect(**self.conn_params)
+        return psycopg2.connect(**self.conn_params, cursor_factory=RealDictCursor)
 
     def _row_to_ticket(self, row: dict | None) -> Ticket | None:
         if not row:
@@ -47,6 +48,14 @@ class TicketRepository:
         )
 
     def create_ticket(self, data: dict) -> Ticket:
+        for field in ("latitude", "longitude", "address", "photo_url"):
+            if field in data and data[field] == "":
+                data[field] = None
+                
+        defaults = {"category_id": None, "status_id": None, "address": None, "photo_url": None}
+        for k, v in defaults.items():
+            data.setdefault(k, v)
+
         query = """
             INSERT INTO tickets (title, description, category_id, status_id,
                                  latitude, longitude, address, photo_url)

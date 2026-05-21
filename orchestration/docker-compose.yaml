@@ -65,14 +65,16 @@ services:
   app:
     container_name: app
     build:
-      context: ./app
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: app/Dockerfile
     restart: unless-stopped
     env_file:
       - .env.app
     depends_on:
       - db
+      - azurite
     ports:
       - 5680:5680
+      - 5681:5681
 volumes:
   postgres_data:

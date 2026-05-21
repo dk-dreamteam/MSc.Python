@@ -30,6 +30,21 @@
           "remoteRoot": "/app"
         }
       ]
+    },
+    {
+      "name": "Attach to City Report APP",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5681
+      },
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/orchestration/app",
+          "remoteRoot": "/app"
+        }
+      ]
     }
   ]
 }

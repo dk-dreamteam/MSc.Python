@@ -18,3 +18,7 @@ INSERT INTO categories (name, description) VALUES
     ('Εγκαταλελειμμένα Οχήματα', 'Οχήματα χωρίς πινακίδες ή εγκαταλελειμμένα για καιρό.'),
     ('Άλλο', 'Οτιδήποτε δεν εντάσσεται στις παραπάνω κατηγορίες.')
 ON CONFLICT (name) DO NOTHING;
+
+-- Insert a sample Ticket
+INSERT INTO tickets (title, description, category_id, status_id, latitude, longitude, address, admin_notes) VALUES
+    ('Λακκούβα στην οδό Κρήτης', 'Υπάρχει μεγάλη λακκούβα στο μέσο του δρόμου που προκαλεί ζημιές στα οχήματα.', 1, 1, NULL, NULL, 'Κρήτης 29, Αγία Βαρβάρα', NULL);

@@ -11,7 +11,11 @@ class PhotoBlobService:
         conn_str = os.getenv("AZURITE_CONNECTION_STRING")
         if not conn_str:
             raise ValueError("AZURITE_CONNECTION_STRING must be set")
-        self.container_name = os.getenv("BLOB_CONTAINER_NAME", "ticket-photos")
+        
+        self.container_name = os.getenv("BLOB_CONTAINER_NAME")
+        if not self.container_name:
+            raise ValueError("BLOB_CONTAINER_NAME must be set")
+
         self.client = BlobServiceClient.from_connection_string(conn_str)
         self._ensure_container()
 

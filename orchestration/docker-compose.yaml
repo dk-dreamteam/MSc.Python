@@ -79,10 +79,13 @@ services:
   streamlit-service:
     container_name: streamlit-service
     build:
-      context: ./streamlit-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: streamlit-service/Dockerfile
     restart: unless-stopped
+    env_file:
+      - .env.streamlit-service
     depends_on:
+      - db
       - azurite
     ports:
       - 5682:5682

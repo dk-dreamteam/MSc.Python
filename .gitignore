@@ -2,3 +2,4 @@ orchestration/.env.db
 orchestration/.env.notification-service
 orchestration/.env.preprocessor-service
 orchestration/.env.app
+orchestration/.env.streamlit-service

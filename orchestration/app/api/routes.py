@@ -3,7 +3,7 @@ import json
 import mimetypes
 import os
 from flask import Flask, request, send_file
-from api.repository import TicketRepository
+from orchestration.data.repository import TicketRepository
 from photo_blob_service import PhotoBlobService
 
 city_report_api = Flask(__name__)

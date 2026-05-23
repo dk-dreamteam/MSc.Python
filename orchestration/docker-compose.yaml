@@ -76,5 +76,16 @@ services:
     ports:
       - 5680:5680
       - 5681:5681
+  streamlit-service:
+    container_name: streamlit-service
+    build:
+      context: ./streamlit-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - azurite
+    ports:
+      - 5682:5682
+      - 5683:5683
 volumes:
   postgres_data:

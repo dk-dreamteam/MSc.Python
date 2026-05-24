@@ -1,12 +1,19 @@
+import os
 import pandas as pd
 import streamlit as st
 from data.repository import TicketRepository
+from queue_sender_service import QueueSenderService
 
 # setup page.
 st.set_page_config(page_title="Λεπτομέρειες Συμβάντος", layout="centered")
 
 # init repo.
 repo = TicketRepository()
+queue_sender = QueueSenderService()
+
+TOPIC_NAME = os.getenv("TOPIC_NAME")
+if not TOPIC_NAME:
+    raise ValueError("TOPIC_NAME must be set")
 
 # get the ticket id from query param.
 ticket_id = st.query_params.get("ticket_id")
@@ -45,14 +52,42 @@ if st.button("Ενημέρωση Σημειώσεων"):
     st.toast("Οι σημειώσεις ενημερώθηκαν επιτυχώς!", icon="✅")
     # st.rerun()
 
-st.divider()
+# current status area.
+st.subheader("Κατάσταση")
 
-with st.container():
-    k1, k2 = st.columns(2)
-    with k1:
-        st.metric("Κατάσταση", ticket.status_name or "—")
-    with k2:
-        st.metric("Κατηγορία", ticket.category_name or "—")
+# set the statues that correspond to the db.
+STATUSES = {
+    "Δημιουργήθηκε": 1,
+    "Σε Εξέλιξη": 2,
+    "Επιλύθηκε": 3,
+    "Απορρίφθηκε": 4,
+}
+
+status_options = list(STATUSES.keys())
+
+# find the select by the value and get the index to select in the dropdown.
+current_idx = status_options.index(ticket.status_name) if ticket.status_name in STATUSES else 0
+
+def on_status_change():
+    new_status = st.session_state.status_select
+    new_id = STATUSES[new_status]
+    repo.update_ticket_status(ticket_id, new_id)
+    if new_id in (3, 4):
+        queue_sender.send_notification(
+            topic_name=TOPIC_NAME,
+            title=f"Η κατάσταση του συμβάντος άλλαξε σε: {new_status}",
+            payload=f"Το συμβάν '{ticket.title}' άλλαξε κατάσταση σε {new_status}",
+        )
+    st.toast(f"Η κατάσταση ενημερώθηκε σε: {new_status}", icon="✅")
+
+st.selectbox(
+    "Επιλέξτε κατάσταση",
+    options=status_options,
+    index=current_idx,
+    key="status_select",
+    on_change=on_status_change,
+    label_visibility="collapsed",
+)
 
 with st.container():
     t1, t2 = st.columns(2)
@@ -60,6 +95,8 @@ with st.container():
         st.metric("Δημιουργήθηκε", ticket.created_at.strftime("%Y-%m-%d %H:%M:%S") if ticket.created_at else "—")
     with t2:
         st.metric("Τελευταία Ενημέρωση", ticket.updated_at.strftime("%Y-%m-%d %H:%M:%S") if ticket.updated_at else "—")
+
+st.metric("Κατηγορία", ticket.category_name or "—")
 
 st.divider()
 
@@ -85,3 +122,15 @@ if ticket.latitude is not None and ticket.longitude is not None:
 else:
     st.info("Αναμένεται ο υπολογισμός των συντεταγμένων")
     st.map()
+
+st.divider()
+
+# footer area
+st.markdown(
+    """
+    <div style="opacity: 0.6;">
+        Made with ❤️ by Dimitris Grevenos me25052 & Konstantinos Kritikakis me25067
+    </div>
+    """,
+    unsafe_allow_html=True,
+)

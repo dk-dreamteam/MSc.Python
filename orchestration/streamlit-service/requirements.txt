@@ -1,3 +1,4 @@
 streamlit
 debugpy
 psycopg2-binary==2.9.10
+azure-storage-queue==12.12.0

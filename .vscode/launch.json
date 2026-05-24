@@ -45,6 +45,29 @@
           "remoteRoot": "/app"
         }
       ]
+    },
+    {
+      "name": "Attach to Streamlit Service",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5682
+      },
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/orchestration/internal-services/queue_sender_service",
+          "remoteRoot": "/app/queue_sender_service"
+        },
+        {
+          "localRoot": "${workspaceFolder}/orchestration/data",
+          "remoteRoot": "/app/data"
+        },
+        {
+          "localRoot": "${workspaceFolder}/orchestration/streamlit-service",
+          "remoteRoot": "/app"
+        }
+      ]
     }
   ]
 }

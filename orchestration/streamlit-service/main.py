@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 
 # init services
@@ -63,6 +64,17 @@ st.dataframe(
     use_container_width=True,
     hide_index=True,
 )
+
+st.divider()
+
+# map area.
+locations = [t for t in tickets if t.latitude is not None and t.longitude is not None]
+st.subheader("Χάρτης Συμβάντων")
+if locations:
+    map_data = [{"lat": float(t.latitude), "lon": float(t.longitude)} for t in locations]
+    st.map(pd.DataFrame(map_data), zoom=12)
+else:
+    st.info("Δεν βρέθηκαν σημεια lat & long για την αποτύπωση του Χάρτη")
 
 st.divider()
 

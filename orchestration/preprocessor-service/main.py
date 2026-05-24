@@ -1,6 +1,5 @@
 import os
 import time
-import base64
 import json
 import logging
 from azure.storage.queue import QueueClient
@@ -41,12 +40,9 @@ def process_messages(queue_client: QueueClient, llm_service: LLMClassifierServic
         # start listening.
         messages = queue_client.receive_messages(max_messages=32, visibility_timeout=30)
         for message in messages:
-            
-            # base 64 decode message.
-            content = base64.b64decode(message.content).decode("utf-8")
             try:
                 # json deserialize.
-                data = json.loads(content)
+                data = json.loads(message.content)
 
                 # job1: Fetch ticket from database.
                 # todo:

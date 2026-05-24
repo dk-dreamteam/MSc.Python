@@ -1,6 +1,5 @@
 import os
 import time
-import base64
 import json
 import logging
 from azure.storage.queue import QueueClient
@@ -44,17 +43,13 @@ def poll_messages(queue_client):
         messages = queue_client.receive_messages(max_messages=32, visibility_timeout=30)
         for message in messages:
             
-            # decode from base 64.
-            content = base64.b64decode(message.content).decode("utf-8")
-            
             # try deserialize. if the payload is corrupted, skip and delete the message from the queue.
             try:
-                data = json.loads(content)
+                data = json.loads(message.content)
                 notification_service.SendPushNotification(
                     topic_name=data.get("topic_name"),
                     title=data.get("title"),
                     payload=data.get("payload"),
-                    attach_url=data.get("attach_url")
                 )
             except Exception as e:
                 logger.error("Failed to process message: %s", e)

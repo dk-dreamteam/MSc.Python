@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 from data.repository import TicketRepository
 
@@ -27,6 +28,25 @@ st.header(ticket.title)
 
 st.markdown(f'"{ticket.description}"' if ticket.description else "*Δεν έχει Περιγραφή*")
 
+st.divider()
+
+# my notes area.
+st.subheader("Σημειώσεις Διαχειριστή")
+
+notes = st.text_area(
+    "Σημειώσεις",
+    value=ticket.admin_notes or "",
+    placeholder="Προσθέστε σημειώσεις...",
+    label_visibility="collapsed",
+)
+
+if st.button("Ενημέρωση Σημειώσεων"):
+    repo.update_ticket_notes(ticket_id, notes)
+    st.toast("Οι σημειώσεις ενημερώθηκαν επιτυχώς!", icon="✅")
+    # st.rerun()
+
+st.divider()
+
 with st.container():
     k1, k2 = st.columns(2)
     with k1:
@@ -34,7 +54,12 @@ with st.container():
     with k2:
         st.metric("Κατηγορία", ticket.category_name or "—")
 
-st.metric("Δημιουργήθηκε", ticket.created_at.strftime("%Y-%m-%d %H:%M:%S") if ticket.created_at else "—")
+with st.container():
+    t1, t2 = st.columns(2)
+    with t1:
+        st.metric("Δημιουργήθηκε", ticket.created_at.strftime("%Y-%m-%d %H:%M:%S") if ticket.created_at else "—")
+    with t2:
+        st.metric("Τελευταία Ενημέρωση", ticket.updated_at.strftime("%Y-%m-%d %H:%M:%S") if ticket.updated_at else "—")
 
 st.divider()
 
@@ -49,23 +74,14 @@ st.divider()
 # map area.
 st.metric("Διεύθυνση", ticket.address or "—")
 
-lat = f"{ticket.latitude:.6f}" if ticket.latitude is not None else "—"
-lon = f"{ticket.longitude:.6f}" if ticket.longitude is not None else "—"
-st.metric("Συντεταγμένες", f"{lat}, {lon}")
+# lat = f"{ticket.latitude:.6f}" if ticket.latitude is not None else "—"
+# lon = f"{ticket.longitude:.6f}" if ticket.longitude is not None else "—"
+# st.metric("Συντεταγμένες", f"{lat}, {lon}")
 
-if ticket.ai_priority_suggestion:
-    cols = st.columns([1, 3])
-    with cols[0]:
-        st.markdown("**AI Πρόταση Προτεραιότητας**")
-    with cols[1]:
-        st.markdown(ticket.ai_priority_suggestion)
-
-if ticket.admin_notes:
-    st.markdown("**Σημειώσεις Διαχειριστή**")
-    st.write(ticket.admin_notes)
-
-cols = st.columns([1, 3])
-with cols[0]:
-    st.markdown("**Ενημερώθηκε**")
-with cols[1]:
-    st.caption(ticket.updated_at.strftime("%Y-%m-%d %H:%M:%S") if ticket.updated_at else "-")
+# show map with pin if the lat and long are not null. Else show empty map.
+if ticket.latitude is not None and ticket.longitude is not None:
+    df = pd.DataFrame({"lat": [float(ticket.latitude)], "lon": [float(ticket.longitude)]})
+    st.map(df, zoom=14)
+else:
+    st.info("Αναμένεται ο υπολογισμός των συντεταγμένων")
+    st.map()

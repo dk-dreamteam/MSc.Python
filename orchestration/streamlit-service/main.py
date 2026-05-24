@@ -45,8 +45,8 @@ data = [
         "Τίτλος": t.title,
         "Κατάσταση": t.status_name,
         "Κατηγορία": t.category_name or "*Δεν έχει αξιολογηθεί*",
-        "Ημερομηνία": t.created_at,
-        "Προβολή": f"?ticket_id={t.id}",
+        "Ημερομηνία": t.created_at.strftime("%Y-%m-%d %H:%M:%S") if t.created_at else "-",
+        "Προβολή": f"./ticket_detail?ticket_id={t.id}",
     }
     for t in filtered
 ]

@@ -29,11 +29,11 @@ class QueueSenderService:
 
         self._send(queue_name, message)
 
-    def send_for_preprocessing(self, text: str, address: str):
+    def send_for_preprocessing(self, id: str, text: str, address: str):
         queue_name = os.getenv("PREPROCESSOR_QUEUE_NAME")
         if not queue_name:
             raise ValueError("PREPROCESSOR_QUEUE_NAME must be set")
         
-        message = {"text": text, "address": address}
+        message = {"id": id, "text": text, "address": address}
         
         self._send(queue_name, message)

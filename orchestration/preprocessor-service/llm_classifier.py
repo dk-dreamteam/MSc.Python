@@ -1,6 +1,9 @@
 import os
 import logging
 from groq import Groq
+from data.repository import TicketRepository
+
+repo = TicketRepository()
 
 logger = logging.getLogger(__name__)
 
@@ -15,9 +18,14 @@ class LLMClassifierService:
         self.client = Groq(api_key=api_key)
         self.model = model
 
+    def _getCategories(self) -> list[dict]:
+        return repo.get_categories()
+
     def Classify(self, text: str) -> int:
+        categories = self._getCategories()
+        categories_prompt_string = ", ".join(f'{cat["id"]}: {cat["name"]}' for cat in categories)
         prompt = (
-            "Classify the following text into one of these categories: [1, 2, 3, 4, 5]. "
+            f"Classify the following text into one of these categories: {categories_prompt_string}. "
             "Return only the category ID as a single number, nothing else.\n\n"
             f"Text: {text}"
         )

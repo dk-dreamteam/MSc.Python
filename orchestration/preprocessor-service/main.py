@@ -6,6 +6,9 @@ from azure.storage.queue import QueueClient
 from azure.core.exceptions import ResourceNotFoundError
 from llm_classifier import LLMClassifierService
 from geo_service import GeoService
+from data.repository import TicketRepository
+
+repo = TicketRepository()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,11 +23,11 @@ QUEUE_NAME = os.getenv("QUEUE_NAME")
 CONNECTION_STRING = os.getenv("AZURITE_CONNECTION_STRING")
 
 
-def get_queue_client() -> QueueClient:
+def _get_queue_client() -> QueueClient:
     return QueueClient.from_connection_string(CONNECTION_STRING, QUEUE_NAME)
 
 
-def ensure_queue(queue_client):
+def _ensure_queue(queue_client):
     try:
         properties = queue_client.get_queue_properties()
         logger.info("Queue '%s' already exists.", QUEUE_NAME)
@@ -45,15 +48,16 @@ def process_messages(queue_client: QueueClient, llm_service: LLMClassifierServic
                 data = json.loads(message.content)
 
                 # job1: Fetch ticket from database.
-                # todo:
+                ticket = repo.get_ticket(data.get("id"))
 
                 # job2: Communicate with LLM to get the description classification.
-                category_id = llm_service.Classify(data.get("text", "Αυτο δεν ειναι κάτι σοβαρό."))
+                category_id = llm_service.Classify(data.get("text"))
 
                 # job3: Communicate with OpenStreetMap nominatim to get the lat long from the address.
-                lat, lon = geo_service.GetCoordinatesFromAddress(data.get("address", "Κρήτης 29, Αγία Βαρβάρα"))
+                lat, lon = geo_service.GetCoordinatesFromAddress(data.get("address"))
 
                 # job4: Update the ticket in the database with updated values.
+                repo.update_ticket(str(ticket.id), {"category_id": category_id, "latitude": lat, "longitude": lon})
                 logger.info("Processed: category=%d, lat=%f, lon=%f", category_id, lat, lon)
             except Exception as e:
                 logger.error("Failed to process message: %s", e)
@@ -69,6 +73,6 @@ llm_service = LLMClassifierService()
 geo_service = GeoService()
 
 # init.
-queue_client = get_queue_client()
-ensure_queue(queue_client)
+queue_client = _get_queue_client()
+_ensure_queue(queue_client)
 process_messages(queue_client, llm_service, geo_service)

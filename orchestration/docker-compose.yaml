@@ -55,8 +55,8 @@ services:
   preprocessor-service:
     container_name: preprocessor-service
     build:
-      context: ./preprocessor-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: preprocessor-service/Dockerfile
     restart: unless-stopped
     env_file:
       - .env.preprocessor-service

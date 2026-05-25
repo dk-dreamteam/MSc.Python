@@ -162,3 +162,10 @@ class TicketRepository:
                 if not row:
                     return None
         return self.get_ticket(ticket_id)
+
+    def get_categories(self) -> list[dict]:
+        query = "SELECT id, name FROM categories;"
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query)
+                return cur.fetchall()

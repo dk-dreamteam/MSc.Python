@@ -5,12 +5,17 @@ import os
 from flask import Flask, request, send_file
 from data.repository import TicketRepository
 from photo_blob_service import PhotoBlobService
+from queue_sender_service import QueueSenderService
 
 city_report_api = Flask(__name__)
 repo = TicketRepository()
 blob_service = PhotoBlobService()
+queue_service = QueueSenderService()
 port = int(os.getenv("APP_PORT"))
 
+TOPIC_NAME = os.getenv("TOPIC_NAME")
+if not TOPIC_NAME:
+    raise ValueError("TOPIC_NAME must be set")
 
 @city_report_api.route('/tickets', methods=['POST'])
 def create_ticket():
@@ -35,9 +40,18 @@ def create_ticket():
         data["status_id"] = status_id
         if file and file.filename:
             blob_name = blob_service.upload(file.read(), file.filename)
-            full_url = f"http://localhost:{port}/tickets/{ticket.id}/photo?blob={blob_name}"
-            data["photo_url"] = full_url
+            data["photo_url"] = blob_name
         ticket = repo.create_ticket(data)
+        if blob_name:
+            full_url = f"http://localhost:{port}/tickets/{ticket.id}/photo?blob={blob_name}"
+            ticket = repo.update_ticket(str(ticket.id), {"photo_url": full_url})
+
+        queue_service.send_notification(
+            topic_name=TOPIC_NAME,
+            title=f"Καταχωρήθηκε νέο συμβάν με τίτλο: {ticket.title}",
+            payload=f"Περγραφή συμβάντος: '{ticket.description}'",
+        )
+
         return json.dumps({"message": "Ticket created successfully", "ticket": ticket.to_dict()}), 201, {"Content-Type": "application/json"}
     except Exception as e:
         return json.dumps({"error": str(e)}), 500, {"Content-Type": "application/json"}

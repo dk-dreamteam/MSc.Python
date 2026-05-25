@@ -3,7 +3,7 @@ import json
 import mimetypes
 import os
 from flask import Flask, request, send_file
-from orchestration.data.repository import TicketRepository
+from data.repository import TicketRepository
 from photo_blob_service import PhotoBlobService
 
 city_report_api = Flask(__name__)
@@ -31,13 +31,13 @@ def create_ticket():
 
     try:
         blob_name = None
+        status_id = 1  # Δημιουργήθηκε
+        data["status_id"] = status_id
         if file and file.filename:
             blob_name = blob_service.upload(file.read(), file.filename)
-            data["photo_url"] = blob_name
-        ticket = repo.create_ticket(data)
-        if blob_name:
             full_url = f"http://localhost:{port}/tickets/{ticket.id}/photo?blob={blob_name}"
-            ticket = repo.update_ticket(str(ticket.id), {"photo_url": full_url})
+            data["photo_url"] = full_url
+        ticket = repo.create_ticket(data)
         return json.dumps({"message": "Ticket created successfully", "ticket": ticket.to_dict()}), 201, {"Content-Type": "application/json"}
     except Exception as e:
         return json.dumps({"error": str(e)}), 500, {"Content-Type": "application/json"}

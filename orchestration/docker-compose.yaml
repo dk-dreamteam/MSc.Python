@@ -33,6 +33,8 @@ services:
     container_name: azurite
     image: mcr.microsoft.com/azure-storage/azurite
     command: ["azurite", "-l", "/data", "--blobHost", "0.0.0.0", "--queueHost", "0.0.0.0", "--tableHost", "0.0.0.0", "--loose", "--skipApiVersionCheck"]
+    volumes:
+      - azurite_blob_data:/data/__blobstorage__
     restart: unless-stopped
     ports:
       - 10000:10000
@@ -92,3 +94,4 @@ services:
       - 5683:5683
 volumes:
   postgres_data:
+  azurite_blob_data:

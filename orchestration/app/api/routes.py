@@ -46,7 +46,7 @@ def create_ticket():
             full_url = f"http://localhost:{port}/tickets/{ticket.id}/photo?blob={blob_name}"
             ticket = repo.update_ticket(str(ticket.id), {"photo_url": full_url})
 
-        queue_service.send_for_preprocessing(id=ticket.id, text=data["description"], address=data["address"])
+        queue_service.send_for_preprocessing(id=ticket.id)
 
         queue_service.send_notification(
             topic_name=TOPIC_NAME,

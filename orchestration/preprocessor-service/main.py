@@ -51,10 +51,10 @@ def process_messages(queue_client: QueueClient, llm_service: LLMClassifierServic
                 ticket = repo.get_ticket(data.get("id"))
 
                 # job2: Communicate with LLM to get the description classification.
-                category_id = llm_service.Classify(data.get("text"))
+                category_id = llm_service.Classify(ticket.description)
 
                 # job3: Communicate with OpenStreetMap nominatim to get the lat long from the address.
-                lat, lon = geo_service.GetCoordinatesFromAddress(data.get("address"))
+                lat, lon = geo_service.GetCoordinatesFromAddress(ticket.address)
 
                 # job4: Update the ticket in the database with updated values.
                 repo.update_ticket(str(ticket.id), {"category_id": category_id, "latitude": lat, "longitude": lon})

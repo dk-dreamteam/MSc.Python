@@ -23,7 +23,7 @@ with st.container(horizontal=True, gap="medium"):
     with cols[0]:
         st.metric("Σύνολο Συμβάντων", str(len(tickets)))
     with cols[1]:
-        st.metric("Μη επιλυμένα Συμβάντα", str(len([t for t in tickets if t.status_id != 1])))
+        st.metric("Μη επιλυμένα Συμβάντα", str(len([t for t in tickets if t.status_id not in (3, 4)])))
 
 st.divider()
 
@@ -75,6 +75,75 @@ if locations:
     st.map(pd.DataFrame(map_data), zoom=12)
 else:
     st.info("Δεν βρέθηκαν σημεια lat & long για την αποτύπωση του Χάρτη")
+
+st.subheader("Ανάλυση Προτεραιότητας")
+
+urgent = sum(1 for t in tickets if t.ai_priority_suggestion == "⚠️ Επείγον")
+normal = sum(1 for t in tickets if t.ai_priority_suggestion == "Κανονική Προτεραιότητα")
+unrated = sum(1 for t in tickets if not t.ai_priority_suggestion)
+
+chart_data = pd.DataFrame({
+    "Κατάσταση": ["⚠️ Επείγον", "Κανονική Προτεραιότητα", "Χωρίς Αξιολόγηση"],
+    "Πλήθος": [urgent, normal, unrated],
+})
+chart_data = chart_data[chart_data["Πλήθος"] > 0]
+
+if not chart_data.empty:
+    st.bar_chart(chart_data, x="Κατάσταση", y="Πλήθος")
+
+st.subheader("Ανάλυση Κατηγοριών")
+
+counts = {}
+for t in tickets:
+    name = t.category_name or "Χωρίς Κατηγορία"
+    counts[name] = counts.get(name, 0) + 1
+
+cat_data = pd.DataFrame(
+    sorted(counts.items(), key=lambda x: x[1], reverse=True),
+    columns=["Κατηγορία", "Πλήθος"],
+)
+
+if not cat_data.empty:
+    st.bar_chart(cat_data, x="Κατηγορία", y="Πλήθος")
+
+st.subheader("Συμβάντα ανά Ημέρα")
+
+tickets_over_time = pd.DataFrame(
+    [{"Ημερομηνία": t.created_at.date(), "Πλήθος": 1} for t in tickets if t.created_at]
+)
+tickets_over_time = tickets_over_time.groupby("Ημερομηνία").sum().reset_index()
+tickets_over_time = tickets_over_time.set_index("Ημερομηνία")
+
+if not tickets_over_time.empty:
+    st.line_chart(tickets_over_time, y="Πλήθος")
+
+st.subheader("Κατανομή Καταστάσεων")
+
+counts = {}
+for t in tickets:
+    name = t.status_name or "Χωρίς Κατάσταση"
+    counts[name] = counts.get(name, 0) + 1
+
+status_data = pd.DataFrame(
+    sorted(counts.items(), key=lambda x: x[1], reverse=True),
+    columns=["Κατάσταση", "Πλήθος"],
+)
+
+if not status_data.empty:
+    st.bar_chart(status_data, x="Κατάσταση", y="Πλήθος")
+
+st.subheader("Κατηγορία vs Προτεραιότητα")
+
+rows = []
+for t in tickets:
+    cat = t.category_name or "Χωρίς Κατηγορία"
+    pri = t.ai_priority_suggestion or "Χωρίς Αξιολόγηση"
+    rows.append({"Κατηγορία": cat, "Προτεραιότητα": pri})
+
+cross_data = pd.DataFrame(rows).groupby(["Κατηγορία", "Προτεραιότητα"]).size().unstack(fill_value=0)
+
+if not cross_data.empty:
+    st.bar_chart(cross_data, stack=True)
 
 st.divider()
 

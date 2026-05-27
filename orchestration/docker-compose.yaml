@@ -4,7 +4,7 @@ services:
     image: postgres:17-alpine
     restart: unless-stopped
     env_file:
-      - .env.db
+      - .env
     volumes:
       - ./scripts:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data
@@ -47,7 +47,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     env_file:
-      - .env.notification-service
+      - .env
     depends_on:
       - azurite
     ports:
@@ -59,7 +59,7 @@ services:
       dockerfile: preprocessor-service/Dockerfile
     restart: unless-stopped
     env_file:
-      - .env.preprocessor-service
+      - .env
     depends_on:
       - azurite
     ports:
@@ -71,7 +71,7 @@ services:
       dockerfile: app/Dockerfile
     restart: unless-stopped
     env_file:
-      - .env.app
+      - .env
     depends_on:
       - db
       - azurite
@@ -85,7 +85,7 @@ services:
       dockerfile: streamlit-service/Dockerfile
     restart: unless-stopped
     env_file:
-      - .env.streamlit-service
+      - .env
     depends_on:
       - db
       - azurite

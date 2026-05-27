@@ -50,6 +50,7 @@ def poll_messages(queue_client):
                     topic_name=data.get("topic_name"),
                     title=data.get("title"),
                     payload=data.get("payload"),
+                    click_url=data.get("click_url"),
                 )
             except Exception as e:
                 logger.error("Failed to process message: %s", e)

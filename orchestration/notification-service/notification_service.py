@@ -12,13 +12,15 @@ class NotificationService:
             raise ValueError("NTFY_BASE_URL must be set")
 
     # makes http call to the ntfy to send the push notication.
-    def SendPushNotification(self, topic_name: str, title: str, payload: str):
+    def SendPushNotification(self, topic_name: str, title: str, payload: str, click_url: str = None):
         url = f"{self.base_url}/{topic_name}"
         headers = {
             "Title": title.encode("utf-8").decode("latin-1"),
             "Priority": "urgent",
             "Content-Type": "text/plain"
         }
+        if click_url:
+            headers["Click"] = click_url
         try:
             response = requests.post(url, headers=headers, data=payload.encode("utf-8"))
             response.raise_for_status()

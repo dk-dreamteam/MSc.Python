@@ -26,6 +26,8 @@ class QueueSenderService:
         message = {"topic_name": topic_name, "title": title, "payload": payload}
         if attach_url:
             message["attach_url"] = attach_url
+        if click_url:
+            message["click_url"] = click_url
 
         self._send(queue_name, message)
 

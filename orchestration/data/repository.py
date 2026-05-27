@@ -85,7 +85,7 @@ class TicketRepository:
                 return self._row_to_ticket(cur.fetchone())
 
     def update_ticket(self, ticket_id: str, data: dict) -> Ticket | None:
-        allowed = {"title", "description", "category_id", "status_id",
+        allowed = {"title", "description", "category_id", "status_id", "ai_priority_suggestion",
                    "latitude", "longitude", "address", "photo_url"}
         fields = {k: v for k, v in data.items() if k in allowed and v is not None}
         if not fields:

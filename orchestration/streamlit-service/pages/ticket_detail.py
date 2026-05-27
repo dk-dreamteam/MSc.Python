@@ -72,11 +72,19 @@ def on_status_change():
     new_status = st.session_state.status_select
     new_id = STATUSES[new_status]
     repo.update_ticket_status(ticket_id, new_id)
-    if new_id in (3, 4):
+    if new_id == 3:
         queue_sender.send_notification(
             topic_name=TOPIC_NAME,
-            title=f"Η κατάσταση του συμβάντος άλλαξε σε: {new_status}",
-            payload=f"Το συμβάν '{ticket.title}' άλλαξε κατάσταση σε {new_status}",
+            title=f"✅ Το συμβάν '{ticket.title}' επιλύθηκε",
+            payload=f"Το συμβάν '{ticket.title}' έχει επισημανθεί ως επιλυμένο.",
+            click_url=f"http://localhost:5683/ticket_detail?ticket_id={ticket_id}",
+        )
+    elif new_id == 4:
+        queue_sender.send_notification(
+            topic_name=TOPIC_NAME,
+            title=f"❌ Το συμβάν '{ticket.title}' απορρίφθηκε",
+            payload=f"Το συμβάν '{ticket.title}' απορρίφθηκε και δεν θα ληφθεί περαιτέρω ενέργεια.",
+            click_url=f"http://localhost:5683/ticket_detail?ticket_id={ticket_id}",
         )
     st.toast(f"Η κατάσταση ενημερώθηκε σε: {new_status}", icon="✅")
 

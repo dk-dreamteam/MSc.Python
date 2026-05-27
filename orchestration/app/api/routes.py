@@ -140,8 +140,9 @@ def create_ticket():
 
         queue_service.send_notification(
             topic_name=TOPIC_NAME,
-            title=f"Καταχωρήθηκε νέο συμβάν με τίτλο: {ticket.title}",
-            payload=f"Περγραφή συμβάντος: '{ticket.description}'",
+            title=f"🚨 Νέο συμβάν: {ticket.title}",
+            payload=f"Περιγραφή: '{ticket.description}'",
+            click_url=f"http://localhost:5682/ticket_detail?ticket_id={ticket.id}",
         )
 
         return json.dumps({"message": "Ticket created successfully", "ticket": ticket.to_dict()}), 201, {"Content-Type": "application/json"}

@@ -41,7 +41,7 @@ class LLMClassifierService:
         prompt = (
             "Classify the following text based on priority. "
             "Return only one word or phrase from these options: "
-            "'Επείγον' or 'Κανονική Προτεραιότητα'. "
+            "'⚠️ Επείγον' or 'Κανονική Προτεραιότητα'. "
             "Anything that is not hygiene-threatening is 'Κανονική Προτεραιότητα'.\n\n"
             f"Text: {text}"
         )

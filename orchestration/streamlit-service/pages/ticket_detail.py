@@ -104,7 +104,12 @@ with st.container():
     with t2:
         st.metric("Τελευταία Ενημέρωση", ticket.updated_at.strftime("%Y-%m-%d %H:%M:%S") if ticket.updated_at else "—")
 
-st.metric("Κατηγορία", ticket.category_name or "—")
+col_cat, col_pri = st.columns(2)
+with col_cat:
+    st.metric("Κατηγορία", ticket.category_name or "—")
+with col_pri:
+    priority = ticket.ai_priority_suggestion or "—"
+    st.metric("Προτεραιότητα", priority)
 
 st.divider()
 

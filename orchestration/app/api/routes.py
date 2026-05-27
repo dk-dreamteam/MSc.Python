@@ -142,7 +142,7 @@ def create_ticket():
             topic_name=TOPIC_NAME,
             title=f"🚨 Νέο συμβάν: {ticket.title}",
             payload=f"Περιγραφή: '{ticket.description}'",
-            click_url=f"http://localhost:5682/ticket_detail?ticket_id={ticket.id}",
+            click_url=f"http://localhost:5683/ticket_detail?ticket_id={ticket.id}",
         )
 
         return json.dumps({"message": "Ticket created successfully", "ticket": ticket.to_dict()}), 201, {"Content-Type": "application/json"}

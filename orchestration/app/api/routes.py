@@ -3,11 +3,43 @@ import json
 import mimetypes
 import os
 from flask import Flask, request, send_file
+from flasgger import Swagger
 from data.repository import TicketRepository
 from photo_blob_service import PhotoBlobService
 from queue_sender_service import QueueSenderService
 
 city_report_api = Flask(__name__)
+Swagger(city_report_api, template={
+    "swagger": "2.0",
+    "info": {
+        "title": "CityReport API",
+        "description": "API for CityReport citizen issue reporting system",
+        "version": "1.0.0",
+    },
+    "definitions": {
+        "Ticket": {
+            "type": "object",
+            "properties": {
+                "id": {"type": "string", "format": "uuid"},
+                "title": {"type": "string"},
+                "description": {"type": "string"},
+                "category_id": {"type": "integer"},
+                "status_id": {"type": "integer"},
+                "latitude": {"type": "number", "format": "float"},
+                "longitude": {"type": "number", "format": "float"},
+                "address": {"type": "string"},
+                "photo_url": {"type": "string"},
+                "ai_priority_suggestion": {"type": "string"},
+                "ai_category_confidence": {"type": "number", "format": "float"},
+                "admin_notes": {"type": "string"},
+                "created_at": {"type": "string", "format": "date-time"},
+                "updated_at": {"type": "string", "format": "date-time"},
+                "status_name": {"type": "string"},
+                "category_name": {"type": "string"},
+            },
+        },
+    },
+})
 repo = TicketRepository()
 blob_service = PhotoBlobService()
 queue_service = QueueSenderService()
@@ -19,6 +51,64 @@ if not TOPIC_NAME:
 
 @city_report_api.route('/tickets', methods=['POST'])
 def create_ticket():
+    """
+    Create a new ticket
+    ---
+    tags:
+      - Tickets
+    consumes:
+      - application/json
+      - multipart/form-data
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            title:
+              type: string
+              description: Ticket title
+            description:
+              type: string
+              description: Ticket description
+            category_id:
+              type: integer
+              description: Category ID
+            latitude:
+              type: number
+              format: float
+              description: Latitude coordinate
+            longitude:
+              type: number
+              format: float
+              description: Longitude coordinate
+            address:
+              type: string
+              description: Street address
+            photo:
+              type: file
+              description: Photo file (multipart only)
+    responses:
+      201:
+        description: Ticket created successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+            ticket:
+              $ref: '#/definitions/Ticket'
+      400:
+        description: Missing required fields
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+      500:
+        description: Internal server error
+    """
     if request.is_json:
         data = request.get_json()
         file = None
@@ -61,6 +151,33 @@ def create_ticket():
 
 @city_report_api.route('/tickets/<uuid:ticket_id>', methods=['GET'])
 def get_ticket(ticket_id):
+    """
+    Get a ticket by ID
+    ---
+    tags:
+      - Tickets
+    parameters:
+      - name: ticket_id
+        in: path
+        type: string
+        format: uuid
+        required: true
+        description: UUID of the ticket
+    responses:
+      200:
+        description: Ticket retrieved successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+            ticket:
+              $ref: '#/definitions/Ticket'
+      404:
+        description: Ticket not found
+      500:
+        description: Internal server error
+    """
     try:
         ticket = repo.get_ticket(str(ticket_id))
         if not ticket:
@@ -72,6 +189,57 @@ def get_ticket(ticket_id):
 
 @city_report_api.route('/tickets/<uuid:ticket_id>', methods=['PUT'])
 def update_ticket(ticket_id):
+    """
+    Update a ticket
+    ---
+    tags:
+      - Tickets
+    parameters:
+      - name: ticket_id
+        in: path
+        type: string
+        format: uuid
+        required: true
+        description: UUID of the ticket
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            title:
+              type: string
+            description:
+              type: string
+            category_id:
+              type: integer
+            latitude:
+              type: number
+              format: float
+            longitude:
+              type: number
+              format: float
+            address:
+              type: string
+            photo_url:
+              type: string
+    responses:
+      200:
+        description: Ticket updated successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+            ticket:
+              $ref: '#/definitions/Ticket'
+      400:
+        description: Request body is required
+      404:
+        description: Ticket not found
+      500:
+        description: Internal server error
+    """
     data = request.get_json()
     if not data:
         return json.dumps({"error": "Request body is required"}), 400, {"Content-Type": "application/json"}
@@ -86,6 +254,37 @@ def update_ticket(ticket_id):
 
 @city_report_api.route('/tickets', methods=['GET'])
 def get_tickets():
+    """
+    List all tickets
+    ---
+    tags:
+      - Tickets
+    parameters:
+      - name: status_id
+        in: query
+        type: integer
+        required: false
+        description: Filter by status ID
+      - name: category_id
+        in: query
+        type: integer
+        required: false
+        description: Filter by category ID
+    responses:
+      200:
+        description: Tickets listed successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+            tickets:
+              type: array
+              items:
+                $ref: '#/definitions/Ticket'
+      500:
+        description: Internal server error
+    """
     status_id = request.args.get("status_id", type=int)
     category_id = request.args.get("category_id", type=int)
     try:
@@ -97,6 +296,45 @@ def get_tickets():
 
 @city_report_api.route('/tickets/<uuid:ticket_id>/status', methods=['PUT'])
 def update_ticket_status(ticket_id):
+    """
+    Update ticket status
+    ---
+    tags:
+      - Tickets
+    parameters:
+      - name: ticket_id
+        in: path
+        type: string
+        format: uuid
+        required: true
+        description: UUID of the ticket
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            status_id:
+              type: integer
+              required: true
+              description: New status ID
+    responses:
+      200:
+        description: Ticket status updated successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+            ticket:
+              $ref: '#/definitions/Ticket'
+      400:
+        description: status_id is required
+      404:
+        description: Ticket not found
+      500:
+        description: Internal server error
+    """
     data = request.get_json()
     if not data or "status_id" not in data:
         return json.dumps({"error": "status_id is required"}), 400, {"Content-Type": "application/json"}
@@ -111,6 +349,45 @@ def update_ticket_status(ticket_id):
 
 @city_report_api.route('/tickets/<uuid:ticket_id>/notes', methods=['PUT'])
 def update_ticket_notes(ticket_id):
+    """
+    Update admin notes on a ticket
+    ---
+    tags:
+      - Tickets
+    parameters:
+      - name: ticket_id
+        in: path
+        type: string
+        format: uuid
+        required: true
+        description: UUID of the ticket
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            admin_notes:
+              type: string
+              required: true
+              description: Admin notes
+    responses:
+      200:
+        description: Ticket notes updated successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+            ticket:
+              $ref: '#/definitions/Ticket'
+      400:
+        description: admin_notes is required
+      404:
+        description: Ticket not found
+      500:
+        description: Internal server error
+    """
     data = request.get_json()
     if not data or "admin_notes" not in data:
         return json.dumps({"error": "admin_notes is required"}), 400, {"Content-Type": "application/json"}
@@ -125,6 +402,34 @@ def update_ticket_notes(ticket_id):
 
 @city_report_api.route('/tickets/<uuid:ticket_id>/photo', methods=['GET'])
 def get_ticket_photo(ticket_id):
+    """
+    Download ticket photo
+    ---
+    tags:
+      - Tickets
+    parameters:
+      - name: ticket_id
+        in: path
+        type: string
+        format: uuid
+        required: true
+        description: UUID of the ticket
+      - name: blob
+        in: query
+        type: string
+        required: true
+        description: Blob name of the photo
+    responses:
+      200:
+        description: Photo file
+        produces:
+          - image/jpeg
+          - image/png
+      404:
+        description: Photo not found
+      500:
+        description: Internal server error
+    """
     try:
         blob_name = request.args.get("blob")
         if not blob_name:
@@ -139,6 +444,31 @@ def get_ticket_photo(ticket_id):
 
 @city_report_api.route('/statuses', methods=['GET'])
 def list_statuses():
+    """
+    List all statuses
+    ---
+    tags:
+      - Statuses
+    responses:
+      200:
+        description: Statuses listed successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+            statuses:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  description:
+                    type: string
+    """
     statuses = [
         {"id": 1, "name": "Δημιουργήθηκε", "description": "Το πρόβλημα καταχωρήθηκε από τον πολίτη."},
         {"id": 2, "name": "Σε Εξέλιξη", "description": "Το πρόβλημα έχει ελεγχθεί και γίνονται ενέργειες επίλυσης."},

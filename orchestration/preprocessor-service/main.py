@@ -43,28 +43,38 @@ def process_messages(queue_client: QueueClient, llm_service: LLMClassifierServic
         # start listening.
         messages = queue_client.receive_messages(max_messages=32, visibility_timeout=30)
         for message in messages:
+            data = json.loads(message.content)
+            id = data.get("id")
+
+            # separating jobs with their own try catch to make sure that if one job fails, the rest of them may carry on.
+
+            # Job 1: Category classification
             try:
-                # json deserialize and get ticket id to work on.
-                data = json.loads(message.content)
-                id = data.get("id")
-
-                # job1: Fetch ticket from database by id.
                 ticket = repo.get_ticket(id)
-
-                # job2: Communicate with LLM to get the description classification.
                 category_id = llm_service.Classify(ticket.description)
-
-                # job3: Communicate with LLM to get the priority.
-                priority = llm_service.ClassifyPriority(ticket.description)
-
-                # job4: Communicate with OpenStreetMap nominatim to get the lat long from the address.
-                lat, lon = geo_service.GetCoordinatesFromAddress(ticket.address)
-
-                # job4: Update the ticket in the database with updated values.
-                repo.update_ticket(str(ticket.id), {"category_id": category_id, "ai_priority_suggestion":priority, "latitude": lat, "longitude": lon})
-                logger.info("Processed: category=%d, lat=%f, lon=%f", category_id, lat, lon)
+                repo.update_ticket(str(ticket.id), {"category_id": category_id})
+                logger.info("Category classified: %d", category_id)
             except Exception as e:
-                logger.error("Failed to process message: %s", e)
+                logger.error("Category classification failed: %s", e)
+
+            # Job 2: Priority classification
+            try:
+                ticket = repo.get_ticket(id)
+                priority = llm_service.ClassifyPriority(ticket.description)
+                repo.update_ticket(str(ticket.id), {"ai_priority_suggestion": priority})
+                logger.info("Priority classified: %s", priority)
+            except Exception as e:
+                logger.error("Priority classification failed: %s", e)
+
+            # Job 3: Geocoding
+            try:
+                ticket = repo.get_ticket(id)
+                lat, lon = geo_service.GetCoordinatesFromAddress(ticket.address)
+                repo.update_ticket(str(ticket.id), {"latitude": lat, "longitude": lon})
+                logger.info("Geocoded: lat=%f, lon=%f", lat, lon)
+            except Exception as e:
+                logger.error("Geocoding failed: %s", e)
+
             queue_client.delete_message(message)
         time.sleep(1)
 

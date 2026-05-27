@@ -36,3 +36,19 @@ class LLMClassifierService:
         category_id = int(response.choices[0].message.content.strip())
         logger.info("Classified text into category: %d", category_id)
         return category_id
+
+    def ClassifyPriority(self, text: str) -> str:
+        prompt = (
+            "Classify the following text based on priority. "
+            "Return only one word or phrase from these options: "
+            "'Επείγον' or 'Κανονική Προτεραιότητα'. "
+            "Anything that is not hygiene-threatening is 'Κανονική Προτεραιότητα'.\n\n"
+            f"Text: {text}"
+        )
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        priority = response.choices[0].message.content.strip()
+        logger.info("Classified text priority: %s", priority)
+        return priority

@@ -19,8 +19,8 @@ for _logger in ["azure", "azure.core", "azure.storage", "urllib3"]:
     logging.getLogger(_logger).setLevel(logging.WARNING)
 
 # get env vars.
-QUEUE_NAME = os.getenv("QUEUE_NAME")
-CONNECTION_STRING = os.getenv("AZURITE_CONNECTION_STRING")
+QUEUE_NAME = os.getenv("NOTIFICATIONS_QUEUE_NAME")
+CONNECTION_STRING = os.getenv("AZURITE_QUEUE_CONNECTION_STRING")
 
 # create queue storage client.
 def get_queue_client() -> QueueClient:
@@ -60,7 +60,7 @@ def poll_messages(queue_client):
 
 #if queuename and conneciton string are not provided, throw exception.
 if not QUEUE_NAME or not CONNECTION_STRING:
-    raise ValueError("QUEUE_NAME and AZURITE_CONNECTION_STRING must be set")
+    raise ValueError("NOTIFICATIONS_QUEUE_NAME and AZURITE_QUEUE_CONNECTION_STRING must be set")
 
 notification_service = NotificationService()
 

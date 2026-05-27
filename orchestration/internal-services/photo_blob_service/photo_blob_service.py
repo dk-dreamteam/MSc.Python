@@ -8,9 +8,9 @@ logger = logging.getLogger(__name__)
 
 class PhotoBlobService:
     def __init__(self):
-        conn_str = os.getenv("AZURITE_CONNECTION_STRING")
+        conn_str = os.getenv("AZURITE_BLOB_CONNECTION_STRING")
         if not conn_str:
-            raise ValueError("AZURITE_CONNECTION_STRING must be set")
+            raise ValueError("AZURITE_BLOB_CONNECTION_STRING must be set")
         
         self.container_name = os.getenv("BLOB_CONTAINER_NAME")
         if not self.container_name:

@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 for _logger in ["azure", "azure.core", "azure.storage", "urllib3"]:
     logging.getLogger(_logger).setLevel(logging.WARNING)
 
-QUEUE_NAME = os.getenv("QUEUE_NAME")
-CONNECTION_STRING = os.getenv("AZURITE_CONNECTION_STRING")
+QUEUE_NAME = os.getenv("PREPROCESSOR_QUEUE_NAME")
+CONNECTION_STRING = os.getenv("AZURITE_QUEUE_CONNECTION_STRING")
 
 
 def _get_queue_client() -> QueueClient:
@@ -44,20 +44,24 @@ def process_messages(queue_client: QueueClient, llm_service: LLMClassifierServic
         messages = queue_client.receive_messages(max_messages=32, visibility_timeout=30)
         for message in messages:
             try:
-                # json deserialize.
+                # json deserialize and get ticket id to work on.
                 data = json.loads(message.content)
+                id = data.get("id")
 
-                # job1: Fetch ticket from database.
-                ticket = repo.get_ticket(data.get("id"))
+                # job1: Fetch ticket from database by id.
+                ticket = repo.get_ticket(id)
 
                 # job2: Communicate with LLM to get the description classification.
                 category_id = llm_service.Classify(ticket.description)
 
-                # job3: Communicate with OpenStreetMap nominatim to get the lat long from the address.
+                # job3: Communicate with LLM to get the priority.
+                priority = llm_service.ClassifyPriority(ticket.description)
+
+                # job4: Communicate with OpenStreetMap nominatim to get the lat long from the address.
                 lat, lon = geo_service.GetCoordinatesFromAddress(ticket.address)
 
                 # job4: Update the ticket in the database with updated values.
-                repo.update_ticket(str(ticket.id), {"category_id": category_id, "latitude": lat, "longitude": lon})
+                repo.update_ticket(str(ticket.id), {"category_id": category_id, "ai_priority_suggestion":priority, "latitude": lat, "longitude": lon})
                 logger.info("Processed: category=%d, lat=%f, lon=%f", category_id, lat, lon)
             except Exception as e:
                 logger.error("Failed to process message: %s", e)
@@ -66,7 +70,7 @@ def process_messages(queue_client: QueueClient, llm_service: LLMClassifierServic
 
 
 if not QUEUE_NAME or not CONNECTION_STRING:
-    raise ValueError("QUEUE_NAME and AZURITE_CONNECTION_STRING must be set")
+    raise ValueError("PREPROCESSOR_QUEUE_NAME and AZURITE_QUEUE_CONNECTION_STRING must be set")
 
 # prepare services.
 llm_service = LLMClassifierService()

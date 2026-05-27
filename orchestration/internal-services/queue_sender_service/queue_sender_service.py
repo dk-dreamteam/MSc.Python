@@ -8,9 +8,9 @@ logger = logging.getLogger(__name__)
 
 class QueueSenderService:
     def __init__(self):
-        conn_str = os.getenv("AZURITE_CONNECTION_STRING")
+        conn_str = os.getenv("AZURITE_QUEUE_CONNECTION_STRING")
         if not conn_str:
-            raise ValueError("AZURITE_CONNECTION_STRING must be set")
+            raise ValueError("AZURITE_QUEUE_CONNECTION_STRING must be set")
         self.conn_str = conn_str
 
     def _send(self, queue_name: str, message: dict):
@@ -18,7 +18,7 @@ class QueueSenderService:
         queue_client.send_message(json.dumps(message, ensure_ascii=False))
         logger.info("Message sent to queue '%s'", queue_name)
 
-    def send_notification(self, topic_name: str, title: str, payload: str, attach_url: str = None):
+    def send_notification(self, topic_name: str, title: str, payload: str, attach_url: str = None, click_url: str = None):
         queue_name = os.getenv("NOTIFICATIONS_QUEUE_NAME")
         if not queue_name:
             raise ValueError("NOTIFICATIONS_QUEUE_NAME must be set")

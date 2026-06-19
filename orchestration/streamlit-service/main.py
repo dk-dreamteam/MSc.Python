@@ -90,6 +90,8 @@ chart_data = chart_data[chart_data["Πλήθος"] > 0]
 
 if not chart_data.empty:
     st.bar_chart(chart_data, x="Κατάσταση", y="Πλήθος")
+else:
+    st.info("Δεν βρέθηκαν δεδομένα για την αποτύπωση του γραφήματος.")
 
 st.subheader("Ανάλυση Κατηγοριών")
 
@@ -105,17 +107,21 @@ cat_data = pd.DataFrame(
 
 if not cat_data.empty:
     st.bar_chart(cat_data, x="Κατηγορία", y="Πλήθος")
+else:
+    st.info("Δεν βρέθηκαν δεδομένα για την αποτύπωση του γραφήματος.")
 
 st.subheader("Συμβάντα ανά Ημέρα")
 
 tickets_over_time = pd.DataFrame(
     [{"Ημερομηνία": t.created_at.date(), "Πλήθος": 1} for t in tickets if t.created_at]
 )
-tickets_over_time = tickets_over_time.groupby("Ημερομηνία").sum().reset_index()
-tickets_over_time = tickets_over_time.set_index("Ημερομηνία")
 
 if not tickets_over_time.empty:
+    tickets_over_time = tickets_over_time.groupby("Ημερομηνία").sum().reset_index()
+    tickets_over_time = tickets_over_time.set_index("Ημερομηνία")
     st.line_chart(tickets_over_time, y="Πλήθος")
+else:
+    st.info("Δεν βρέθηκαν δεδομένα για την αποτύπωση του γραφήματος.")
 
 st.subheader("Κατανομή Καταστάσεων")
 
@@ -131,6 +137,8 @@ status_data = pd.DataFrame(
 
 if not status_data.empty:
     st.bar_chart(status_data, x="Κατάσταση", y="Πλήθος")
+else:
+    st.info("Δεν βρέθηκαν δεδομένα για την αποτύπωση του γραφήματος.")
 
 st.subheader("Κατηγορία vs Προτεραιότητα")
 
@@ -140,10 +148,11 @@ for t in tickets:
     pri = t.ai_priority_suggestion or "Χωρίς Αξιολόγηση"
     rows.append({"Κατηγορία": cat, "Προτεραιότητα": pri})
 
-cross_data = pd.DataFrame(rows).groupby(["Κατηγορία", "Προτεραιότητα"]).size().unstack(fill_value=0)
-
-if not cross_data.empty:
+if rows:
+    cross_data = pd.DataFrame(rows).groupby(["Κατηγορία", "Προτεραιότητα"]).size().unstack(fill_value=0)
     st.bar_chart(cross_data, stack=True)
+else:
+    st.info("Δεν βρέθηκαν δεδομένα για την αποτύπωση του γραφήματος.")
 
 st.divider()
 

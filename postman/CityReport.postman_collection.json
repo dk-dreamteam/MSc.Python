@@ -1,0 +1,264 @@
+{
+  "info": {
+    "_postman_id": "8f9e00f0-9dfb-4483-9324-19ef1c5af10b",
+    "name": "CityReport",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "4062130"
+  },
+  "item": [
+    {
+      "name": "Statuses",
+      "item": [
+        {
+          "name": "Get Statuses",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5680/statuses",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5680",
+              "path": [
+                "statuses"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tickets",
+      "item": [
+        {
+          "name": "Get Tickets",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5680/tickets",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5680",
+              "path": [
+                "tickets"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Ticket by Id",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5680/tickets/9c47dd85-1659-4c41-97b4-cd1bfd22ad8a",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5680",
+              "path": [
+                "tickets",
+                "9c47dd85-1659-4c41-97b4-cd1bfd22ad8a"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tickets By Status and Category",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5680/tickets?status_id=3&category_id=2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5680",
+              "path": [
+                "tickets"
+              ],
+              "query": [
+                {
+                  "key": "status_id",
+                  "value": "3"
+                },
+                {
+                  "key": "category_id",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tickets by Category",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5680/tickets?category_id=1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5680",
+              "path": [
+                "tickets"
+              ],
+              "query": [
+                {
+                  "key": "category_id",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tickets by Status",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5680/tickets?status_id=2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5680",
+              "path": [
+                "tickets"
+              ],
+              "query": [
+                {
+                  "key": "status_id",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create new Ticket",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "type": "text",
+                  "key": "title",
+                  "value": "Δεν έχουμε ρεύμα"
+                },
+                {
+                  "type": "text",
+                  "key": "description",
+                  "value": "Έχει κοπεί το ρεύμα, και δε μπορούμε να κάνουμε εργασία στη Python"
+                },
+                {
+                  "type": "text",
+                  "key": "category_id",
+                  "value": "2"
+                },
+                {
+                  "type": "text",
+                  "key": "address",
+                  "value": "Κρήτης 29, Αγία Βαρβάρα"
+                },
+                {
+                  "type": "file",
+                  "key": "photo",
+                  "value": null
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:5680/tickets",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5680",
+              "path": [
+                "tickets"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Ticket by Id",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Φωτιά έξω από το σπίτι μου\",\n    \"description\": \"Έχει πάρει φωτιά ένα αυτοκίνητο έξω από το σπίτι μου! Ελάτε άμεσα!\",\n    \"category_id\": 1,\n    \"address\": \"Κρήτης 29, Αγία Βαρβάρα\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5680/tickets/9c47dd85-1659-4c41-97b4-cd1bfd22ad8a",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5680",
+              "path": [
+                "tickets",
+                "9c47dd85-1659-4c41-97b4-cd1bfd22ad8a"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

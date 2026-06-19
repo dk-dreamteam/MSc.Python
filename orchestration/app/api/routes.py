@@ -240,6 +240,9 @@ def update_ticket(ticket_id):
         ticket = repo.update_ticket(str(ticket_id), data)
         if not ticket:
             return json.dumps({"error": "Ticket not found"}), 404, {"Content-Type": "application/json"}
+
+        queue_service.send_for_preprocessing(id=ticket.id)
+
         return json.dumps({"message": "Ticket updated successfully", "ticket": ticket.to_dict()}), 200, {"Content-Type": "application/json"}
     except Exception as e:
         return json.dumps({"error": str(e)}), 500, {"Content-Type": "application/json"}

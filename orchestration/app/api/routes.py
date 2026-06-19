@@ -31,7 +31,6 @@ Swagger(city_report_api, template={
                 "photo_url": {"type": "string"},
                 "ai_priority_suggestion": {"type": "string"},
                 "ai_category_confidence": {"type": "number", "format": "float"},
-                "admin_notes": {"type": "string"},
                 "created_at": {"type": "string", "format": "date-time"},
                 "updated_at": {"type": "string", "format": "date-time"},
                 "status_name": {"type": "string"},

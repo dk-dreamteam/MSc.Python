@@ -74,14 +74,6 @@ def create_ticket():
             category_id:
               type: integer
               description: Category ID
-            latitude:
-              type: number
-              format: float
-              description: Latitude coordinate
-            longitude:
-              type: number
-              format: float
-              description: Longitude coordinate
             address:
               type: string
               description: Street address
@@ -117,6 +109,9 @@ def create_ticket():
 
     if not data:
         return json.dumps({"error": "Request body is required"}), 400, {"Content-Type": "application/json"}
+
+    data["latitude"] = None
+    data["longitude"] = None
 
     required = ["title", "description"]
     missing = [f for f in required if f not in data]
@@ -213,12 +208,6 @@ def update_ticket(ticket_id):
               type: string
             category_id:
               type: integer
-            latitude:
-              type: number
-              format: float
-            longitude:
-              type: number
-              format: float
             address:
               type: string
             photo_url:
@@ -243,6 +232,10 @@ def update_ticket(ticket_id):
     data = request.get_json()
     if not data:
         return json.dumps({"error": "Request body is required"}), 400, {"Content-Type": "application/json"}
+
+    data["latitude"] = None
+    data["longitude"] = None
+
     try:
         ticket = repo.update_ticket(str(ticket_id), data)
         if not ticket:
